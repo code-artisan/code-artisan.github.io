@@ -17,13 +17,13 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>小程序跨端—在小程序里面跑 react app | Hexo</title>
-  <meta name="description" content="大家好，我是来自杭州端点科技的前端工程师，花名：辰鬼，我目前在产品研发部门负责跨端框架 Octopus（已适配 iOS、Android、H5、微信、支付宝、钉钉、京东、字节，其他小程序平台逐步适配中）和跨端组件库，该部门包含的产品有：Trantor（Low code 研发平台）、装修、跨端框架。如果你对我们的工作内容有浓厚的兴趣，请投简历至邮箱：&amp;#121;&amp;#x69;&amp;#113;&amp;#105;&amp;#">
+  <title>小程序跨端—在小程序里面跑 react app | Artisan&#39;s blog.</title>
+  <meta name="description" content="大家好，我是来自杭州端点科技的前端工程师，花名：辰鬼，我目前在产品研发部门负责跨端框架 Octopus（已适配 iOS、Android、H5、微信、支付宝、钉钉、京东、字节，其他小程序平台逐步适配中）和跨端组件库，该部门包含的产品有：Trantor（Low code 研发平台）、装修、跨端框架。如果你对我们的工作内容有浓厚的兴趣，请投简历至邮箱：&amp;#x79;&amp;#105;&amp;#x71;&amp;#x69;&amp;#">
 <meta property="og:type" content="article">
 <meta property="og:title" content="小程序跨端—在小程序里面跑 react app">
-<meta property="og:url" content="http://blog.artisans.cafe/2021-05-25/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E8%B7%A8%E7%AB%AF%E2%80%94%E5%9C%A8%E5%B0%8F%E7%A8%8B%E5%BA%8F%E9%87%8C%E9%9D%A2%E8%B7%91%20react%20app/index.html">
+<meta property="og:url" content="http://blog.artisans.cafe/2021-05-25/developer-mini-program-with-react/index.html">
 <meta property="og:site_name" content="Artisan&#39;s blog.">
-<meta property="og:description" content="大家好，我是来自杭州端点科技的前端工程师，花名：辰鬼，我目前在产品研发部门负责跨端框架 Octopus（已适配 iOS、Android、H5、微信、支付宝、钉钉、京东、字节，其他小程序平台逐步适配中）和跨端组件库，该部门包含的产品有：Trantor（Low code 研发平台）、装修、跨端框架。如果你对我们的工作内容有浓厚的兴趣，请投简历至邮箱：&amp;#121;&amp;#x69;&amp;#113;&amp;#105;&amp;#">
+<meta property="og:description" content="大家好，我是来自杭州端点科技的前端工程师，花名：辰鬼，我目前在产品研发部门负责跨端框架 Octopus（已适配 iOS、Android、H5、微信、支付宝、钉钉、京东、字节，其他小程序平台逐步适配中）和跨端组件库，该部门包含的产品有：Trantor（Low code 研发平台）、装修、跨端框架。如果你对我们的工作内容有浓厚的兴趣，请投简历至邮箱：&amp;#x79;&amp;#105;&amp;#x71;&amp;#x69;&amp;#">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621836703719-f31d2a81-b380-4fe2-9eea-a7c2d3992301.png#clientId=ufb1045e9-e7ec-4&from=paste&height=220&id=uf9a02f68&margin=%5Bobject%20Object%5D&name=image.png&originHeight=440&originWidth=2970&originalType=binary&size=95809&status=done&style=none&taskId=u7bbaf28c-10aa-452b-9894-930db73523b&width=1485">
 <meta property="og:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621849815989-60a8c724-78f1-4b91-a5ce-a2abe627e208.png#clientId=ufb1045e9-e7ec-4&from=paste&height=626&id=ufeeabf14&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1252&originWidth=1602&originalType=binary&size=293737&status=done&style=none&taskId=u5850ab77-94a6-4fcc-a8c2-8773178a2df&width=801">
@@ -37,13 +37,13 @@
 <meta property="og:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621837805030-c10b9065-5352-41f9-93e5-17dcd27bf5f3.png#clientId=ufb1045e9-e7ec-4&from=paste&height=1050&id=u64451570&margin=%5Bobject%20Object%5D&name=image.png&originHeight=2100&originWidth=3360&originalType=binary&size=2093377&status=done&style=none&taskId=u9f140d8e-99f9-4c96-8860-d2102199cca&width=1680">
 <meta property="og:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621837638991-a05c8d5f-efde-41c7-b05b-702cb6d98bb3.png#clientId=ufb1045e9-e7ec-4&from=paste&height=16&id=ucdc929ea&name=image.png&originHeight=64&originWidth=64&originalType=binary&size=3692&status=done&style=none&taskId=u365c01dd-cb6a-446c-ab6e-d90f4f0ad40&width=16">
 <meta property="article:published_time" content="2021-05-25T06:52:02.000Z">
-<meta property="article:modified_time" content="2021-05-25T07:07:22.187Z">
+<meta property="article:modified_time" content="2021-05-25T09:36:22.263Z">
 <meta property="article:author" content="北漂客">
 <meta property="article:tag" content="小程序">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621836703719-f31d2a81-b380-4fe2-9eea-a7c2d3992301.png#clientId=ufb1045e9-e7ec-4&from=paste&height=220&id=uf9a02f68&margin=%5Bobject%20Object%5D&name=image.png&originHeight=440&originWidth=2970&originalType=binary&size=95809&status=done&style=none&taskId=u7bbaf28c-10aa-452b-9894-930db73523b&width=1485">
   <!-- Canonical links -->
-  <link rel="canonical" href="http://blog.artisans.cafe/2021-05-25/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E8%B7%A8%E7%AB%AF%E2%80%94%E5%9C%A8%E5%B0%8F%E7%A8%8B%E5%BA%8F%E9%87%8C%E9%9D%A2%E8%B7%91%20react%20app/index.html">
+  <link rel="canonical" href="http://blog.artisans.cafe/2021-05-25/developer-mini-program-with-react/index.html">
   
     <link rel="alternate" href="/atom.xml" title="Artisan&#39;s blog." type="application/atom+xml">
   
@@ -238,7 +238,7 @@
                 
               </p>
               <p class="item-title">
-                <a href="/2021-05-25/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E8%B7%A8%E7%AB%AF%E2%80%94%E5%9C%A8%E5%B0%8F%E7%A8%8B%E5%BA%8F%E9%87%8C%E9%9D%A2%E8%B7%91%20react%20app/" class="title">小程序跨端—在小程序里面跑 react app</a>
+                <a href="/2021-05-25/developer-mini-program-with-react/" class="title">小程序跨端—在小程序里面跑 react app</a>
               </p>
               <p class="item-date">
                 <time datetime="2021-05-25T06:52:02.000Z" itemprop="datePublished">2021-05-25</time>
@@ -319,7 +319,7 @@
   
 <main class="main" role="main">
   <div class="content">
-  <article id="post-小程序跨端—在小程序里面跑 react app" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+  <article id="post-developer-mini-program-with-react" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
     
     <div class="article-header">
       
@@ -334,7 +334,7 @@
       <div class="article-meta">
         <span class="article-date">
     <i class="icon icon-calendar-check"></i>
-	<a href="/2021-05-25/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E8%B7%A8%E7%AB%AF%E2%80%94%E5%9C%A8%E5%B0%8F%E7%A8%8B%E5%BA%8F%E9%87%8C%E9%9D%A2%E8%B7%91%20react%20app/" class="article-date">
+	<a href="/2021-05-25/developer-mini-program-with-react/" class="article-date">
 	  <time datetime="2021-05-25T06:52:02.000Z" itemprop="datePublished">2021-05-25</time>
 	</a>
 </span>
@@ -348,24 +348,22 @@
 
         
 
-        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021-05-25/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E8%B7%A8%E7%AB%AF%E2%80%94%E5%9C%A8%E5%B0%8F%E7%A8%8B%E5%BA%8F%E9%87%8C%E9%9D%A2%E8%B7%91%20react%20app/#comments" class="article-comment-link">评论</a></span>
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021-05-25/developer-mini-program-with-react/#comments" class="article-comment-link">评论</a></span>
         
       </div>
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
-        <p>大家好，我是来自杭州端点科技的前端工程师，花名：辰鬼，我目前在产品研发部门负责跨端框架 Octopus（已适配 iOS、Android、H5、微信、支付宝、钉钉、京东、字节，其他小程序平台逐步适配中）和跨端组件库，该部门包含的产品有：Trantor（Low code 研发平台）、装修、跨端框架。如果你对我们的工作内容有浓厚的兴趣，请投简历至邮箱：<a href="mailto:&#121;&#x69;&#113;&#105;&#97;&#110;&#x67;&#x2e;&#106;&#x79;&#113;&#x40;&#x61;&#x6c;&#105;&#98;&#97;&#x62;&#97;&#x2d;&#x69;&#x6e;&#x63;&#46;&#99;&#111;&#109;">&#121;&#x69;&#113;&#105;&#97;&#110;&#x67;&#x2e;&#106;&#x79;&#113;&#x40;&#x61;&#x6c;&#105;&#98;&#97;&#x62;&#97;&#x2d;&#x69;&#x6e;&#x63;&#46;&#99;&#111;&#109;</a>。</p>
+        <p>大家好，我是来自杭州端点科技的前端工程师，花名：辰鬼，我目前在产品研发部门负责跨端框架 Octopus（已适配 iOS、Android、H5、微信、支付宝、钉钉、京东、字节，其他小程序平台逐步适配中）和跨端组件库，该部门包含的产品有：Trantor（Low code 研发平台）、装修、跨端框架。如果你对我们的工作内容有浓厚的兴趣，请投简历至邮箱：<a href="mailto:&#x79;&#105;&#x71;&#x69;&#x61;&#110;&#x67;&#x2e;&#106;&#121;&#x71;&#x40;&#x61;&#108;&#105;&#98;&#x61;&#98;&#97;&#45;&#x69;&#x6e;&#99;&#x2e;&#x63;&#x6f;&#x6d;">&#x79;&#105;&#x71;&#x69;&#x61;&#110;&#x67;&#x2e;&#106;&#121;&#x71;&#x40;&#x61;&#108;&#105;&#98;&#x61;&#98;&#97;&#45;&#x69;&#x6e;&#99;&#x2e;&#x63;&#x6f;&#x6d;</a>。</p>
 <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>​<br>在开始之前我们先来聊一聊关于微信小程序的发展历史：2016 年 1 月 11 日，微信之父张小龙进行了公开亮相；2016 年 9 月 21 日，微信小程序进入了正式开启内测阶段；2017 年 1 月 9 号微信小程序终于正式发布了第一个版本，我也因此成为了第一批接触和开发微信小程序的开发人员；2017 年 12 月 28 日微信小程序加入小游戏程；2018 年 7 月 13 日微信 App 为小程序添加单独的入口……</p>
 <p>随着时间的推移，微信小程序逐步稳定，也已经取得巨大的成功，吸引了越来越多的厂商加入这个游戏，开始纷纷打造自己的小程序平台，且都参考了微信小程序的设计。也正式因为小程序的成功才有了今天的内容，否则当业务需要适配 Web、iOS、Android 的时候就要负出高昂的人力和时间成本，这时候只编写一套代码就能够适配到多端的能力就显得极为需要（write once, run anywhere）。<br>​</p>
 <blockquote>
 <p>Tips：以下所有提到的小程序均指微信小程序。</p>
 </blockquote>
-<p>​</p>
 <h2 id="为什么要选择-react"><a href="#为什么要选择-react" class="headerlink" title="为什么要选择 react?"></a>为什么要选择 react?</h2><p>为什么是 React 而不是 Vue，两方面原因吧：1、对 React 熟，学习成本更低；2、之前我们已经有基于 React Naitve 的三端（iOS、Android、Web）统一方案，且有很多相对成熟的配套工具/库。以上两点原因后者占到比重更大，那么选择 <code>React</code> 就成了一个必然的结果。<br>​</p>
 <h2 id="为什么不用现有的方案？"><a href="#为什么不用现有的方案？" class="headerlink" title="为什么不用现有的方案？"></a>为什么不用现有的方案？</h2><p>目前市面上已经有一些不错的、基于 React 思想开发的框架，如：TaroJS、Remax、RaxJS，而他们的方案基本都是基于 Web 的标准，现在我们把视线拉回到上面我说的两点原因，由此可以得出两种结果：1、选一个适合自己的现有方案，然后自己改；2、从零开始自己写一个。显然，我们选的是后者。<br>​</p>
 <h2 id="如何将-react-运行到小程序中"><a href="#如何将-react-运行到小程序中" class="headerlink" title="如何将 react 运行到小程序中?"></a>如何将 react 运行到小程序中?</h2><p>对 React 稍有研究的小伙伴都知道 React 是有一个单独的渲染器，即：<a target="_blank" rel="noopener" href="https://www.npmjs.com/package/react-reconciler">react-reconciler</a>。有了这个线索，似乎事情开始变得简单了，只需要维护一下 <code>VNode</code> 的增删改再使用小程序的模板能力（下文着重讲一下，这里先不展开来讲）进行动态渲染貌似就有希望，因此我们可以画出大致的流程图，编译时的内容本篇不做讲解。<br><img src="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621836703719-f31d2a81-b380-4fe2-9eea-a7c2d3992301.png#clientId=ufb1045e9-e7ec-4&from=paste&height=220&id=uf9a02f68&margin=%5Bobject%20Object%5D&name=image.png&originHeight=440&originWidth=2970&originalType=binary&size=95809&status=done&style=none&taskId=u7bbaf28c-10aa-452b-9894-930db73523b&width=1485" alt="image.png"><br><img src="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621849815989-60a8c724-78f1-4b91-a5ce-a2abe627e208.png#clientId=ufb1045e9-e7ec-4&from=paste&height=626&id=ufeeabf14&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1252&originWidth=1602&originalType=binary&size=293737&status=done&style=none&taskId=u5850ab77-94a6-4fcc-a8c2-8773178a2df&width=801" alt="image.png"></p>
-<h3 id="react-reconciler-渲染器"><a href="#react-reconciler-渲染器" class="headerlink" title="react-reconciler 渲染器"></a>react-reconciler 渲染器</h3><p>​</p>
-<p><img src="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621836772080-98ef0a16-8780-4089-a377-ea3713c358c0.png#clientId=ufb1045e9-e7ec-4&from=paste&height=223&id=uaaea4603&margin=%5Bobject%20Object%5D&name=image.png&originHeight=446&originWidth=2978&originalType=binary&size=119280&status=done&style=none&taskId=uf846d49d-6429-49a0-9379-dd935501053&width=1489" alt="image.png"><br>​</p>
+<h3 id="react-reconciler-渲染器"><a href="#react-reconciler-渲染器" class="headerlink" title="react-reconciler 渲染器"></a>react-reconciler 渲染器</h3><p>​<br><img src="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621836772080-98ef0a16-8780-4089-a377-ea3713c358c0.png#clientId=ufb1045e9-e7ec-4&from=paste&height=223&id=uaaea4603&margin=%5Bobject%20Object%5D&name=image.png&originHeight=446&originWidth=2978&originalType=binary&size=119280&status=done&style=none&taskId=uf846d49d-6429-49a0-9379-dd935501053&width=1489" alt="image.png"><br>​</p>
 <p>现在我们回到 react-reconciler 这个包，来看看大概是怎么用的，更多细节请翻阅官方文档和源码。</p>
 <figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> HostConfig = &#123;</span><br><span class="line">  <span class="comment">// 添加子节点</span></span><br><span class="line">  <span class="function"><span class="title">appendChild</span>(<span class="params">parent: VNode, child: VNode</span>)</span> &#123;</span><br><span class="line">    parent.appendChild(child)</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// 添加初始节点</span></span><br><span class="line">  <span class="attr">appendInitialChild</span>: <span class="function">(<span class="params">parent: VNode, child: VNode</span>) =&gt;</span> &#123;</span><br><span class="line">    parent.appendChild(child)</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// 在某一节点之前插入节点</span></span><br><span class="line">  <span class="function"><span class="title">insertBefore</span>(<span class="params">parent: VNode, child: VNode, beforeChild: VNode</span>)</span> &#123;</span><br><span class="line">    parent.insertBefore(child, beforeChild)</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// 删除某一个节点</span></span><br><span class="line">  <span class="function"><span class="title">removeChild</span>(<span class="params">parent: VNode, child: VNode</span>)</span> &#123;</span><br><span class="line">    parent.removeChild(child)</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>​</p>
@@ -421,7 +419,7 @@
     
     <li class="post-copyright-link hidden-xs">
       <strong>本文链接：</strong>
-      <a href="http://blog.artisans.cafe/2021-05-25/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E8%B7%A8%E7%AB%AF%E2%80%94%E5%9C%A8%E5%B0%8F%E7%A8%8B%E5%BA%8F%E9%87%8C%E9%9D%A2%E8%B7%91%20react%20app/" title="小程序跨端—在小程序里面跑 react app" target="_blank" rel="external">http://blog.artisans.cafe/2021-05-25/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E8%B7%A8%E7%AB%AF%E2%80%94%E5%9C%A8%E5%B0%8F%E7%A8%8B%E5%BA%8F%E9%87%8C%E9%9D%A2%E8%B7%91%20react%20app/</a>
+      <a href="http://blog.artisans.cafe/2021-05-25/developer-mini-program-with-react/" title="小程序跨端—在小程序里面跑 react app" target="_blank" rel="external">http://blog.artisans.cafe/2021-05-25/developer-mini-program-with-react/</a>
     </li>
     
     <li class="post-copyright-license">
