@@ -10,7 +10,6 @@ feature:
 大家好，我是来自杭州端点科技的前端工程师，花名：辰鬼，我目前在产品研发部门负责跨端框架 Octopus（已适配 iOS、Android、H5、微信、支付宝、钉钉、京东、字节，其他小程序平台逐步适配中）和跨端组件库，该部门包含的产品有：Trantor（Low code 研发平台）、装修、跨端框架。如果你对我们的工作内容有浓厚的兴趣，请投简历至邮箱：yiqiang.jyq@alibaba-inc.com。
 
 
-
 ## 前言
 ​
 在开始之前我们先来聊一聊关于微信小程序的发展历史：2016 年 1 月 11 日，微信之父张小龙进行了公开亮相；2016 年 9 月 21 日，微信小程序进入了正式开启内测阶段；2017 年 1 月 9 号微信小程序终于正式发布了第一个版本，我也因此成为了第一批接触和开发微信小程序的开发人员；2017 年 12 月 28 日微信小程序加入小游戏程；2018 年 7 月 13 日微信 App 为小程序添加单独的入口……
@@ -21,26 +20,23 @@ feature:
 
 > Tips：以下所有提到的小程序均指微信小程序。
 
-​
 
 ## 为什么要选择 react?
 
 为什么是 React 而不是 Vue，两方面原因吧：1、对 React 熟，学习成本更低；2、之前我们已经有基于 React Naitve 的三端（iOS、Android、Web）统一方案，且有很多相对成熟的配套工具/库。以上两点原因后者占到比重更大，那么选择 `React` 就成了一个必然的结果。
 ​
-
 ## 为什么不用现有的方案？
 
 目前市面上已经有一些不错的、基于 React 思想开发的框架，如：TaroJS、Remax、RaxJS，而他们的方案基本都是基于 Web 的标准，现在我们把视线拉回到上面我说的两点原因，由此可以得出两种结果：1、选一个适合自己的现有方案，然后自己改；2、从零开始自己写一个。显然，我们选的是后者。
 ​
-
 ## 如何将 react 运行到小程序中?
 
 对 React 稍有研究的小伙伴都知道 React 是有一个单独的渲染器，即：[react-reconciler](https://www.npmjs.com/package/react-reconciler)。有了这个线索，似乎事情开始变得简单了，只需要维护一下 `VNode` 的增删改再使用小程序的模板能力（下文着重讲一下，这里先不展开来讲）进行动态渲染貌似就有希望，因此我们可以画出大致的流程图，编译时的内容本篇不做讲解。
 ![image.png](https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621836703719-f31d2a81-b380-4fe2-9eea-a7c2d3992301.png#clientId=ufb1045e9-e7ec-4&from=paste&height=220&id=uf9a02f68&margin=%5Bobject%20Object%5D&name=image.png&originHeight=440&originWidth=2970&originalType=binary&size=95809&status=done&style=none&taskId=u7bbaf28c-10aa-452b-9894-930db73523b&width=1485)
 ![image.png](https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621849815989-60a8c724-78f1-4b91-a5ce-a2abe627e208.png#clientId=ufb1045e9-e7ec-4&from=paste&height=626&id=ufeeabf14&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1252&originWidth=1602&originalType=binary&size=293737&status=done&style=none&taskId=u5850ab77-94a6-4fcc-a8c2-8773178a2df&width=801)
+
 ### react-reconciler 渲染器
 ​
-
 ![image.png](https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621836772080-98ef0a16-8780-4089-a377-ea3713c358c0.png#clientId=ufb1045e9-e7ec-4&from=paste&height=223&id=uaaea4603&margin=%5Bobject%20Object%5D&name=image.png&originHeight=446&originWidth=2978&originalType=binary&size=119280&status=done&style=none&taskId=uf846d49d-6429-49a0-9379-dd935501053&width=1489)
 ​
 
