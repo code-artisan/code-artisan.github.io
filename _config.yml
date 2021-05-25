@@ -104,4 +104,4 @@ theme: pure
 deploy:
   type: git
   repo: https://github.com/code-artisan/code-artisan.github.io
-  branch: master
+  branch: gh-pages
