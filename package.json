@@ -5,7 +5,7 @@
   "scripts": {
     "build": "hexo generate",
     "clean": "hexo clean",
-    "deploy": "hexo deploy",
+    "deploy": "hexo deploy && cp CNAME ./public/CNAME && cp readme.md ./public/readme.md",
     "server": "hexo server"
   },
   "hexo": {

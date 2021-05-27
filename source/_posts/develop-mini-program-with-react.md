@@ -7,19 +7,15 @@ hideInList: false
 feature:
 ---
 
-大家好，我是来自杭州端点科技的前端工程师，花名：辰鬼，我目前在产品研发部门负责跨端框架 Octopus（已适配 iOS、Android、H5、微信、支付宝、钉钉、京东、字节，其他小程序平台逐步适配中）和跨端组件库，该部门包含的产品有：Trantor（Low code 研发平台）、装修、跨端框架。如果你对我们的工作内容有浓厚的兴趣，请投简历至邮箱：yiqiang.jyq@alibaba-inc.com。
-
+大家好，我是来自杭州端点科技的前端工程师，我目前在产品研发部门负责跨端框架 Octopus（已适配 iOS、Android、H5、微信、支付宝、钉钉、京东、字节，其他小程序平台逐步适配中）和跨端组件库，该部门包含的产品有：Trantor（Low code 研发平台）、装修、跨端框架。如果你对我们的工作内容有浓厚的兴趣，请投简历至邮箱：yiqiang.jyq@alibaba-inc.com。
 
 ## 前言
 ​
 在开始之前我们先来聊一聊关于微信小程序的发展历史：2016 年 1 月 11 日，微信之父张小龙进行了公开亮相；2016 年 9 月 21 日，微信小程序进入了正式开启内测阶段；2017 年 1 月 9 号微信小程序终于正式发布了第一个版本，我也因此成为了第一批接触和开发微信小程序的开发人员；2017 年 12 月 28 日微信小程序加入小游戏程；2018 年 7 月 13 日微信 App 为小程序添加单独的入口……
 
-
 随着时间的推移，微信小程序逐步稳定，也已经取得巨大的成功，吸引了越来越多的厂商加入这个游戏，开始纷纷打造自己的小程序平台，且都参考了微信小程序的设计。也正式因为小程序的成功才有了今天的内容，否则当业务需要适配 Web、iOS、Android 的时候就要负出高昂的人力和时间成本，这时候只编写一套代码就能够适配到多端的能力就显得极为需要（write once, run anywhere）。
 ​
-
 > Tips：以下所有提到的小程序均指微信小程序。
-
 
 ## 为什么要选择 react?
 
@@ -62,11 +58,9 @@ const HostConfig = {
   // ...
 };
 ```
-​
 
 剩下的问题就是如何把 VNode 转成 JSON 以及通过调用 setData 和调用模板进行页面的拼装完成渲染。这两个问题其实都不难。先来看第一个问题：如何把 VNode 转成 JSON？
 ​
-
 ### VNode 转 JSON
 
 ![image.png](https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621836812224-bad0501b-6114-4629-afd0-136d434d5ad7.png#clientId=ufb1045e9-e7ec-4&from=paste&height=224&id=u15ffd8f5&margin=%5Bobject%20Object%5D&name=image.png&originHeight=448&originWidth=2976&originalType=binary&size=111970&status=done&style=none&taskId=ueb4631b0-9a0b-414c-933f-fb456a2c238&width=1488)
@@ -130,15 +124,12 @@ class VNode extends PureNode {
 }
 ```
 
-
 ### setData 和调用模板
 
 ![image.png](https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621836958282-ac5717f0-2e6e-4e78-abf9-db2bd37de8ae.png#clientId=ufb1045e9-e7ec-4&from=paste&height=234&id=u5abc5d86&margin=%5Bobject%20Object%5D&name=image.png&originHeight=468&originWidth=2974&originalType=binary&size=133743&status=done&style=none&taskId=u909f0466-f0e0-42b9-a112-8af4d89bfbe&width=1487)
 
-
 我们先来了解这两个知识点：`setData` 和 `模板`。setData 是小程序提供的 `API`，也是逻辑层和视图层通信的桥梁。
 ​
-
 ![image.png](https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621849163763-e9a8da7e-85c2-4357-8791-c1bff0b0110a.png#clientId=ufb1045e9-e7ec-4&from=paste&height=532&id=u6e84d1af&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1064&originWidth=1500&originalType=binary&size=204446&status=done&style=none&taskId=u3f438f08-abc7-4b8d-9b73-08e2c6751f3&width=750)
 ​
 
@@ -167,9 +158,7 @@ Page({
 })
 ```
 
-
 你可以把所有的模板都放到同一个文件中维护，在这里我们统一放到 base.wxml 文件中。
-​
 
 base.wxml
 ```xml
@@ -217,7 +206,6 @@ this.context.setData(payload, () => {
 });
 ```
 ​
-
 后半部分：在页面的视图文件中调用对应的模板进行页面的拼装完成渲染。
 ```xml
 <import src="/base.wxml" />
@@ -229,9 +217,7 @@ this.context.setData(payload, () => {
 渲染结果：
 ![image.png](https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621835203320-0ddf2a17-c83e-4c0c-99ab-1e5b29dada25.png#clientId=ufb1045e9-e7ec-4&from=paste&height=1050&id=ub5e7e5a1&margin=%5Bobject%20Object%5D&name=image.png&originHeight=2100&originWidth=3360&originalType=binary&size=1832292&status=done&style=none&taskId=u17b4a3e2-0858-4161-96ab-6c59676285d&width=1680)
 
-
 ## 示例
-
 
 我们来看个例子：
 ```jsx
@@ -255,17 +241,13 @@ export default function basicComponents() {
 
 ![image.png](https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621837805030-c10b9065-5352-41f9-93e5-17dcd27bf5f3.png#clientId=ufb1045e9-e7ec-4&from=paste&height=1050&id=u64451570&margin=%5Bobject%20Object%5D&name=image.png&originHeight=2100&originWidth=3360&originalType=binary&size=2093377&status=done&style=none&taskId=u9f140d8e-99f9-4c96-8860-d2102199cca&width=1680)
 
-
 ## 总结
 
 到这里，我们已经详细地介绍了如何把 React 代码运行到小程序中：React reconciler 渲染器 + 单独维护 VNode，然后调用 VNode 的 toJSON 方法转成 JSON 对象，再调用当前页面实例的 setData 把 VNode tree 传到视图层，视图层根据 VNode tree 递归调用对应的模板进行渲染。
 ​
-
 ## 最后
 
 打造一个好用的跨端框架是非常具有挑战性和创新的事情，其难度堪比古人上青天 <img src="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621837638991-a05c8d5f-efde-41c7-b05b-702cb6d98bb3.png#clientId=ufb1045e9-e7ec-4&from=paste&height=16&id=ucdc929ea&name=image.png&originHeight=64&originWidth=64&originalType=binary&size=3692&status=done&style=none&taskId=u365c01dd-cb6a-446c-ab6e-d90f4f0ad40&width=16" width="20" height="20"/> ，但古人有云：路漫漫其修远兮，吾将上下而求索《屈原·离骚》。道路且长，行则将至《荀子·修身》。
 
-
 非常感谢大家的阅读和支持，本篇的内容就到这里，后面有时间会再出几期关于跨端框架的内容，如果你有任何好的建议或疑问欢迎在评论区留言，我们下期见。
 ​
-
