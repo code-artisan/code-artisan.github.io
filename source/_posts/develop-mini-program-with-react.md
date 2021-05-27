@@ -37,6 +37,7 @@ feature:
 ​
 
 现在我们回到 react-reconciler 这个包，来看看大概是怎么用的，更多细节请翻阅官方文档和源码。
+
 ```typescript
 const HostConfig = {
   // 添加子节点
@@ -103,7 +104,9 @@ class VNode extends PureNode {
 }
 
 ```
+
 通过调用 VNode 的 `toJSON` 方法，我们将可以得到类似以下的数据结构：
+
 ```js
 {
 	root: {
@@ -134,6 +137,7 @@ class VNode extends PureNode {
 ​
 
 `模板`其主要用途用于定义代码片段，可以在不同的地方调用。声明一个模板：
+
 ```xml
 <template name="msgItem">
   <view>
@@ -142,10 +146,13 @@ class VNode extends PureNode {
   </view>
 </template>
 ```
+
 使用 `is` 属性，声明需要使用的模板，然后将模板所需要的 data 传入，如：
+
 ```xml
 <template is="msgItem" data="{{...item}}"/>
 ```
+
 ```javascript
 Page({
   data: {
@@ -161,6 +168,7 @@ Page({
 你可以把所有的模板都放到同一个文件中维护，在这里我们统一放到 base.wxml 文件中。
 
 base.wxml
+
 ```xml
 <wxs src='./helper.wxs' module="helper" />
 
@@ -191,9 +199,9 @@ base.wxml
 ...
 ```
 
-
 再来看调用 setData 和调用模板进行页面的拼装完成渲染这个过程。
 前半部分：调用 setData 我们需要手动维护一下页面的实例，然后调用当前页面实例的 setData。
+
 ```javascript
 ...
 
@@ -207,19 +215,23 @@ this.context.setData(payload, () => {
 ```
 ​
 后半部分：在页面的视图文件中调用对应的模板进行页面的拼装完成渲染。
+
 ```xml
 <import src="/base.wxml" />
 
 <template is="OCTOPUS_BASE_TEMPLATE" data="{{root: root}}" />
 ```
+
 流程示意图：
 ![image.png](https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621849033796-43016733-cb65-4369-b131-d748a76313e1.png#clientId=ufb1045e9-e7ec-4&from=paste&height=329&id=uc4dabda1&margin=%5Bobject%20Object%5D&name=image.png&originHeight=658&originWidth=1832&originalType=binary&size=65847&status=done&style=none&taskId=ud9f63c64-c6f8-4553-9f1b-26c19f992da&width=916)
+
 渲染结果：
 ![image.png](https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621835203320-0ddf2a17-c83e-4c0c-99ab-1e5b29dada25.png#clientId=ufb1045e9-e7ec-4&from=paste&height=1050&id=ub5e7e5a1&margin=%5Bobject%20Object%5D&name=image.png&originHeight=2100&originWidth=3360&originalType=binary&size=1832292&status=done&style=none&taskId=u17b4a3e2-0858-4161-96ab-6c59676285d&width=1680)
 
 ## 示例
 
 我们来看个例子：
+
 ```jsx
 import React from 'react';
 import { View,  Text } from 'react-native';
@@ -233,10 +245,13 @@ export default function basicComponents() {
   );
 }
 ```
+
 最后的运行效果：
+
 > 模板代码展示
 
 ![image.png](https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621822768186-69532717-840b-4d10-856c-4e767c673600.png#clientId=u542e46aa-e0ab-4&from=paste&height=988&id=ubdb56808&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1976&originWidth=3300&originalType=binary&size=2146809&status=done&style=none&taskId=u484bea35-bb44-4416-ab66-27b06ee0afa&width=1650)
+
 > 编译后的 JS 和当前页面实例展示
 
 ![image.png](https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1621837805030-c10b9065-5352-41f9-93e5-17dcd27bf5f3.png#clientId=ufb1045e9-e7ec-4&from=paste&height=1050&id=u64451570&margin=%5Bobject%20Object%5D&name=image.png&originHeight=2100&originWidth=3360&originalType=binary&size=2093377&status=done&style=none&taskId=u9f140d8e-99f9-4c96-8860-d2102199cca&width=1680)
