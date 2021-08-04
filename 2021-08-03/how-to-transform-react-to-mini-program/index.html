@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>小程序跨端—浅谈小程序代码编译过程 | Artisan&#39;s blog.</title>
+  <meta name="description" content="前言 在阅读本篇文章之前，你需要先掌握 Webpack、Babel 的插件开发且熟悉 AST。  最近几年随着前端技术不段发展和更新，催生出很多优秀的前端框架，如：Vue、React。在享受到了 Vue、React 带来的红利之后，现在的大部分前端工程都会采用 Vue&#x2F;React 来开发，包括最近几年出现的各种跨端框架也是如此。但享受红利势必是要付出一些代价的，其中最为典型且最重要的就是编译过程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="小程序跨端—浅谈小程序代码编译过程">
+<meta property="og:url" content="http://blog.artisans.cafe/2021-08-03/how-to-transform-react-to-mini-program/index.html">
+<meta property="og:site_name" content="Artisan&#39;s blog.">
+<meta property="og:description" content="前言 在阅读本篇文章之前，你需要先掌握 Webpack、Babel 的插件开发且熟悉 AST。  最近几年随着前端技术不段发展和更新，催生出很多优秀的前端框架，如：Vue、React。在享受到了 Vue、React 带来的红利之后，现在的大部分前端工程都会采用 Vue&#x2F;React 来开发，包括最近几年出现的各种跨端框架也是如此。但享受红利势必是要付出一些代价的，其中最为典型且最重要的就是编译过程">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1627891436116-f9365e12-9225-4db1-8d8a-ac100376b5ae.png#clientId=u25c33056-b4b5-4&from=paste&height=370&id=u0f0f9163&margin=%5Bobject%20Object%5D&name=image.png&originHeight=740&originWidth=2430&originalType=binary&ratio=1&size=179047&status=done&style=none&taskId=u9a086512-4921-492f-9054-ede7592c158&width=1215">
+<meta property="og:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1627901557556-6af7ef33-d05f-472a-9b8d-af81488e8266.png#clientId=u25c33056-b4b5-4&from=paste&height=312&id=wMu02&margin=%5Bobject%20Object%5D&name=carbon.png&originHeight=624&originWidth=1772&originalType=binary&ratio=1&size=59053&status=done&style=none&taskId=u29ab8e25-6a51-42c9-80aa-ab6bfc3ad91&width=886">
+<meta property="og:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1627901568494-9f49eafa-ef5d-427c-86f6-b02556d3db16.png#clientId=u25c33056-b4b5-4&from=paste&height=438&id=u3ac952e9&margin=%5Bobject%20Object%5D&name=carbon%20%281%29.png&originHeight=876&originWidth=1772&originalType=binary&ratio=1&size=125012&status=done&style=none&taskId=u8942a158-66c3-4fce-82f6-4683fe2e156&width=886">
+<meta property="og:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1627891632475-32a8e00b-6071-47c7-ac88-639ba1c514bd.png#clientId=u25c33056-b4b5-4&from=paste&height=845&id=u16d4ff15&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1690&originWidth=1732&originalType=binary&ratio=1&size=460675&status=done&style=none&taskId=u270fb02c-eb45-4de1-a403-b4ec214891b&width=866">
+<meta property="og:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1627893305833-055b190e-a66c-479c-bbb4-76af8e90d244.png#clientId=u25c33056-b4b5-4&from=paste&height=513&id=u16510870&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1026&originWidth=2526&originalType=binary&ratio=1&size=792133&status=done&style=none&taskId=u4ac8930c-0da8-4f9a-829b-68397883044&width=1263">
+<meta property="og:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1627902933935-a17c6fc0-8043-4085-a105-e1b5aa521449.png#clientId=u25c33056-b4b5-4&from=paste&height=557&id=ud8a888bf&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1114&originWidth=3194&originalType=binary&ratio=1&size=1296585&status=done&style=none&taskId=uafb672ef-128e-4313-bc24-345c2620ac2&width=1597">
+<meta property="og:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1627902954158-373bc451-3407-4552-a493-83c9dfe82a34.png#clientId=u25c33056-b4b5-4&from=paste&height=380&id=u82243739&margin=%5Bobject%20Object%5D&name=image.png&originHeight=760&originWidth=2716&originalType=binary&ratio=1&size=636654&status=done&style=none&taskId=u0a4fb27b-c5cb-475a-b826-74f158fc25a&width=1358">
+<meta property="article:published_time" content="2021-08-02T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-08-03T02:47:08.477Z">
+<meta property="article:author" content="北漂客">
+<meta property="article:tag" content="小程序">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1627891436116-f9365e12-9225-4db1-8d8a-ac100376b5ae.png#clientId=u25c33056-b4b5-4&from=paste&height=370&id=u0f0f9163&margin=%5Bobject%20Object%5D&name=image.png&originHeight=740&originWidth=2430&originalType=binary&ratio=1&size=179047&status=done&style=none&taskId=u9a086512-4921-492f-9054-ede7592c158&width=1215">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://blog.artisans.cafe/2021-08-03/how-to-transform-react-to-mini-program/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Artisan&#39;s blog." type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/code-artisan" target="_blank">
+          <img class="img-circle" src="/images/avatar.png" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">北漂客</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Web 前端 &amp;&amp; 移动开发</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> 杭州</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/code-artisan" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSS/" rel="tag">CSS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSS3/" rel="tag">CSS3</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML5/" rel="tag">HTML5</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JSONP/" rel="tag">JSONP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/electron/" rel="tag">electron</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/emoji/" rel="tag">emoji</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/" rel="tag">mac</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/npm/" rel="tag">npm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/react-js/" rel="tag">react.js</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sublime/" rel="tag">sublime</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/text/" rel="tag">text</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83/" rel="tag">代码规范</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%89%8D%E7%AB%AF/" rel="tag">前端</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AE%89%E5%85%A8/" rel="tag">安全</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B0%8F%E7%A8%8B%E5%BA%8F/" rel="tag">小程序</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E5%8D%8F%E8%AE%AE/" rel="tag">开源协议</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B6%88%E6%81%AF%E9%80%9A%E7%9F%A5/" rel="tag">消息通知</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%A9%E8%81%94%E7%BD%91/" rel="tag">物联网</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/CSS/" style="font-size: 13px;">CSS</a> <a href="/tags/CSS3/" style="font-size: 13.25px;">CSS3</a> <a href="/tags/HTML5/" style="font-size: 13.25px;">HTML5</a> <a href="/tags/JSONP/" style="font-size: 13px;">JSONP</a> <a href="/tags/JavaScript/" style="font-size: 13.75px;">JavaScript</a> <a href="/tags/electron/" style="font-size: 13px;">electron</a> <a href="/tags/emoji/" style="font-size: 13px;">emoji</a> <a href="/tags/javascript/" style="font-size: 13px;">javascript</a> <a href="/tags/mac/" style="font-size: 13px;">mac</a> <a href="/tags/npm/" style="font-size: 13px;">npm</a> <a href="/tags/react-js/" style="font-size: 13px;">react.js</a> <a href="/tags/sublime/" style="font-size: 13px;">sublime</a> <a href="/tags/text/" style="font-size: 13px;">text</a> <a href="/tags/%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83/" style="font-size: 13px;">代码规范</a> <a href="/tags/%E5%89%8D%E7%AB%AF/" style="font-size: 14px;">前端</a> <a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 13px;">安全</a> <a href="/tags/%E5%B0%8F%E7%A8%8B%E5%BA%8F/" style="font-size: 13.5px;">小程序</a> <a href="/tags/%E5%BC%80%E6%BA%90%E5%8D%8F%E8%AE%AE/" style="font-size: 13.25px;">开源协议</a> <a href="/tags/%E6%B6%88%E6%81%AF%E9%80%9A%E7%9F%A5/" style="font-size: 13px;">消息通知</a> <a href="/tags/%E7%89%A9%E8%81%94%E7%BD%91/" style="font-size: 13px;">物联网</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021-08-03/how-to-transform-react-to-mini-program/" class="title">小程序跨端—浅谈小程序代码编译过程</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-08-02T16:00:00.000Z" itemprop="datePublished">2021-08-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021-05-25/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E8%B7%A8%E7%AB%AF%E2%80%94%E5%9C%A8%E5%B0%8F%E7%A8%8B%E5%BA%8F%E9%87%8C%E9%9D%A2%E8%B7%91%20react%20app/" class="title">小程序跨端—在小程序里面跑 react app</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-25T06:52:02.000Z" itemprop="datePublished">2021-05-25</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2019-06-26/slice,substr%E5%92%8Csubstring%E7%9A%84%E5%8C%BA%E5%88%AB/" class="title">JS 中 slice, substr, substring 的区别</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-06-26T06:02:04.000Z" itemprop="datePublished">2019-06-26</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2017-09-07/%E5%BC%80%E6%BA%90%E5%8D%8F%E8%AE%AE%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B/" class="title">开源协议的那些事</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2017-09-07T08:52:02.000Z" itemprop="datePublished">2017-09-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2017-08-16/%E6%95%99%E4%BD%A0%E5%A6%82%E4%BD%95%E5%9C%A8%20%20Mac%20%E4%B8%8A%E7%8E%A9%20emoji%20%E8%A1%A8%E6%83%85/" class="title">教你如何在  Mac 上玩 emoji 表情</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2017-08-16T08:33:24.000Z" itemprop="datePublished">2017-08-16</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-how-to-transform-react-to-mini-program" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      小程序跨端—浅谈小程序代码编译过程
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021-08-03/how-to-transform-react-to-mini-program/" class="article-date">
+	  <time datetime="2021-08-02T16:00:00.000Z" itemprop="datePublished">2021-08-03</time>
+	</a>
+</span>
+        
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/%E5%B0%8F%E7%A8%8B%E5%BA%8F/" rel="tag">小程序</a>
+  </span>
+
+
+        
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021-08-03/how-to-transform-react-to-mini-program/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p><img src="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1627891436116-f9365e12-9225-4db1-8d8a-ac100376b5ae.png#clientId=u25c33056-b4b5-4&from=paste&height=370&id=u0f0f9163&margin=%5Bobject%20Object%5D&name=image.png&originHeight=740&originWidth=2430&originalType=binary&ratio=1&size=179047&status=done&style=none&taskId=u9a086512-4921-492f-9054-ede7592c158&width=1215" alt="image.png"></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><blockquote>
+<p>在阅读本篇文章之前，你需要先掌握 Webpack、Babel 的插件开发且熟悉 AST。</p>
+</blockquote>
+<p>最近几年随着前端技术不段发展和更新，催生出很多优秀的前端框架，如：Vue、React。在享受到了 Vue、React 带来的红利之后，现在的大部分前端工程都会采用 Vue/React 来开发，包括最近几年出现的各种跨端框架也是如此。但享受红利势必是要付出一些代价的，其中最为典型且最重要的就是编译过程。虽然现在已经有很多成熟的方案供我们选择，但是我们不能一直停留在使用层面，所谓『技多不压身』。本篇将会简单剖析从 React 代码到小程序可运行代码的编译过程。</p>
+<p>在开始之前，我们先看一下编译前和编译后的目录结构。<br>​</p>
+<p>编译前：<img src="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1627901557556-6af7ef33-d05f-472a-9b8d-af81488e8266.png#clientId=u25c33056-b4b5-4&from=paste&height=312&id=wMu02&margin=%5Bobject%20Object%5D&name=carbon.png&originHeight=624&originWidth=1772&originalType=binary&ratio=1&size=59053&status=done&style=none&taskId=u29ab8e25-6a51-42c9-80aa-ab6bfc3ad91&width=886" alt="carbon.png"><br>编译后：<br><img src="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1627901568494-9f49eafa-ef5d-427c-86f6-b02556d3db16.png#clientId=u25c33056-b4b5-4&from=paste&height=438&id=u3ac952e9&margin=%5Bobject%20Object%5D&name=carbon%20%281%29.png&originHeight=876&originWidth=1772&originalType=binary&ratio=1&size=125012&status=done&style=none&taskId=u8942a158-66c3-4fce-82f6-4683fe2e156&width=886" alt="carbon (1).png"><br>写过小程序的同学应该能发现编译后的目录结构跟小程序的标准目录结构基本相同。<br>​</p>
+<h2 id="现状"><a href="#现状" class="headerlink" title="现状"></a>现状</h2><p>假设我们现在已经有了一个相对完善的运行时框架，它的使用方式看起来大概是以下这样。<br>​</p>
+<p>路由声明：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/index.mp.tsx</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; Router, Route, TabRouter &#125; <span class="keyword">from</span> <span class="string">&#x27;third-party/framework&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> Home <span class="keyword">from</span> <span class="string">&#x27;./pages/home/index&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> Video <span class="keyword">from</span> <span class="string">&#x27;./pages/video/index&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Index</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="title">render</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">  	<span class="keyword">return</span> (</span><br><span class="line">      <span class="xml"><span class="tag">&lt;&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">Router</span>&gt;</span></span></span><br><span class="line"><span class="xml">          <span class="tag">&lt;<span class="name">TabRouter</span> <span class="attr">text</span>=<span class="string">&quot;Home&quot;</span>&gt;</span></span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;<span class="name">Route</span> <span class="attr">name</span>=<span class="string">&#x27;Home&#x27;</span> <span class="attr">component</span>=<span class="string">&#123;Home&#125;</span> /&gt;</span></span></span><br><span class="line"><span class="xml">          <span class="tag">&lt;/<span class="name">TabRouter</span>&gt;</span></span></span><br><span class="line"><span class="xml">          <span class="tag">&lt;<span class="name">TabRouter</span> <span class="attr">text</span>=<span class="string">&quot;Video&quot;</span>&gt;</span></span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;<span class="name">Route</span> <span class="attr">name</span>=<span class="string">&#x27;Video&#x27;</span> <span class="attr">component</span>=<span class="string">&#123;Video&#125;</span> /&gt;</span></span></span><br><span class="line"><span class="xml">          <span class="tag">&lt;/<span class="name">TabRouter</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;/<span class="name">Router</span>&gt;</span></span></span><br><span class="line"><span class="xml">        &#123;this.props.children&#125;</span></span><br><span class="line"><span class="xml">       <span class="tag">&lt;/&gt;</span></span></span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> Index;</span><br></pre></td></tr></table></figure>
+<p>业务代码：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/pages/home/index.jsx</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; View, Text &#125; <span class="keyword">from</span> <span class="string">&#x27;react-native&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> () =&gt; &#123;</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="xml"><span class="tag">&lt;<span class="name">View</span> <span class="attr">style</span>=<span class="string">&#123;&#123;</span> <span class="attr">...</span> &#125;&#125;&gt;</span></span></span><br><span class="line"><span class="xml">      <span class="tag">&lt;<span class="name">Text</span> <span class="attr">style</span>=<span class="string">&#123;&#123;</span> <span class="attr">...</span> &#125;&#125;&gt;</span>Hello terminus.<span class="tag">&lt;/<span class="name">Text</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;/<span class="name">View</span>&gt;</span></span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上只是实例代码，在实际业务场景中页面数量更多且复杂度更高，虽然这些不会成为影响本篇内容的因素。<br>​</p>
+<h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><p>要想将以上业务代码在小程序端正常运行和渲染，则必须要经过编译和转换。从 JSX 到小程序代码的编译过程大致如下图所示：<br><img src="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1627891632475-32a8e00b-6071-47c7-ac88-639ba1c514bd.png#clientId=u25c33056-b4b5-4&from=paste&height=845&id=u16d4ff15&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1690&originWidth=1732&originalType=binary&ratio=1&size=460675&status=done&style=none&taskId=u270fb02c-eb45-4de1-a403-b4ec214891b&width=866" alt="image.png"><br>其中最核心、最复杂的部分莫过于各种各样的 Webpack 插件，每个插件都有各自的分工，比如：拷贝静态资源、模板生成、虚拟模块的管理等等。</p>
+<h2 id="解析路由"><a href="#解析路由" class="headerlink" title="解析路由"></a>解析路由</h2><p>解析路由是构建过程的首要任务，只有拿到业务中的路由信息后才能知道有哪些页面需要被注册，就像原生小程序的 app.json 中的 <code>pages</code>、<code>tabBar.list</code> 字段一样需要先将路由信息注册到小程序中。<br>​</p>
+<p>解析路由的核心逻辑是对源码进行 <code>AST</code>（抽象语法树） 操作。我们再回过头来看一下路由的声明方式：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; Router, Route, TabRouter &#125; <span class="keyword">from</span> <span class="string">&#x27;third-party/framework&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> Home <span class="keyword">from</span> <span class="string">&#x27;./pages/home/index&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> Video <span class="keyword">from</span> <span class="string">&#x27;./pages/video/index&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Index</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="title">render</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">  	<span class="keyword">return</span> (</span><br><span class="line">      <span class="xml"><span class="tag">&lt;&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">Router</span>&gt;</span></span></span><br><span class="line"><span class="xml">          <span class="tag">&lt;<span class="name">TabRouter</span> <span class="attr">text</span>=<span class="string">&quot;Home&quot;</span>&gt;</span></span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;<span class="name">Route</span> <span class="attr">name</span>=<span class="string">&#x27;Home&#x27;</span> <span class="attr">component</span>=<span class="string">&#123;Home&#125;</span> /&gt;</span></span></span><br><span class="line"><span class="xml">          <span class="tag">&lt;/<span class="name">TabRouter</span>&gt;</span></span></span><br><span class="line"><span class="xml">          <span class="tag">&lt;<span class="name">TabRouter</span> <span class="attr">text</span>=<span class="string">&quot;Video&quot;</span>&gt;</span></span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;<span class="name">Route</span> <span class="attr">name</span>=<span class="string">&#x27;Video&#x27;</span> <span class="attr">component</span>=<span class="string">&#123;Video&#125;</span> /&gt;</span></span></span><br><span class="line"><span class="xml">          <span class="tag">&lt;/<span class="name">TabRouter</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;/<span class="name">Router</span>&gt;</span></span></span><br><span class="line"><span class="xml">        &#123;this.props.children&#125;</span></span><br><span class="line"><span class="xml">       <span class="tag">&lt;/&gt;</span></span></span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> Index;</span><br></pre></td></tr></table></figure>
+<p>再来看一下小程序的 app.json 配置示例（以微信小程序为例）：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;pages&quot;</span>: [</span><br><span class="line">    <span class="string">&quot;pages/home/index&quot;</span>,</span><br><span class="line">    <span class="string">&quot;pages/video/index&quot;</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">&quot;tabBar&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;list&quot;</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">&quot;pagePath&quot;</span>: <span class="string">&quot;pages/home/index&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;text&quot;</span>: <span class="string">&quot;Home&quot;</span></span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">&quot;pagePath&quot;</span>: <span class="string">&quot;pages/video/index&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;text&quot;</span>: <span class="string">&quot;Video&quot;</span></span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>细心观察似乎发现这两者潜藏着一些关系：</p>
+<ul>
+<li>pages 中的项和 pagePath 的值是 component 对应的 value；</li>
+<li>tabBar 项的 text 字段的值是 TabRouter text 属性的值；</li>
+</ul>
+<p><img src="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1627893305833-055b190e-a66c-479c-bbb4-76af8e90d244.png#clientId=u25c33056-b4b5-4&from=paste&height=513&id=u16510870&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1026&originWidth=2526&originalType=binary&ratio=1&size=792133&status=done&style=none&taskId=u4ac8930c-0da8-4f9a-829b-68397883044&width=1263" alt="image.png"><br>在理清楚逻辑后就可以写代码解析路由了，由于本步骤所涉及到的代码篇幅较长，这里只放伪代码用于参考。<br>​</p>
+<p>我们先写一个用于解析路由的 babel 插件：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// plugins/babel-router-plugin.ts</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">  <span class="function"><span class="title">pre</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">    <span class="comment">// 每次解析前清空之前的结果，避免路由重复。</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="function"><span class="title">post</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">    <span class="comment">// 解析完后把结果存储起来，后面需要用到。</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">visitor</span>: &#123;</span><br><span class="line">    <span class="function"><span class="title">ImportDeclaration</span>(<span class="params">&#123; node: &#123; specifiers, source &#125; &#125;</span>)</span> &#123;</span><br><span class="line">      <span class="comment">// 把引用的路径存起来，用于后续生成文件时使用。</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="function"><span class="title">ReturnStatement</span>(<span class="params">paths</span>)</span> &#123;</span><br><span class="line">      <span class="comment">// AST 词法分析，TabRouter 代表 TabBar，Route 代表普通路由、Subpackage 代表分包。</span></span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>封装一个解析路由的辅助方法，在其内部调用上面的插件：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// utils/routes.ts</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> path <span class="keyword">from</span> <span class="string">&#x27;path&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> babel <span class="keyword">from</span> <span class="string">&#x27;@babel/core&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> jetpack <span class="keyword">from</span> <span class="string">&#x27;fs-jetpack&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 解析项目的路由文件，获取路由信息。</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param </span>base workspace</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param </span>entry 路由文件路径</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param </span>plugins babel plugins</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> analysis = <span class="function">(<span class="params">base: <span class="built_in">string</span>, entry: <span class="built_in">string</span>, plugins?: <span class="built_in">any</span> | <span class="built_in">any</span>[]</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> options = &#123;</span><br><span class="line">    <span class="attr">plugins</span>: [].concat(plugins),</span><br><span class="line">    <span class="attr">presets</span>: [</span><br><span class="line">      [</span><br><span class="line">        <span class="string">&#x27;@babel/preset-typescript&#x27;</span>,</span><br><span class="line">        &#123;</span><br><span class="line">          ...</span><br><span class="line">        &#125;</span><br><span class="line">      ]</span><br><span class="line">    ],</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="keyword">const</span> filepath = path.resolve(base, entry);</span><br><span class="line">  		<span class="keyword">const</span> content = jetpack.read(filepath, <span class="string">&#x27;utf8&#x27;</span>);</span><br><span class="line"></span><br><span class="line">      resolve(babel.transform(content, options).code);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (error) &#123;</span><br><span class="line">      reject(error);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>有了上面的插件和辅助方法，调用它们就能拿到对应的路由信息了。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; analysis &#125; <span class="keyword">from</span> <span class="string">&#x27;./utils/routes&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> BabelRouterPlugin <span class="keyword">from</span> <span class="string">&#x27;./plugins/babel-router-plugin&#x27;</span>;</span><br><span class="line"></span><br><span class="line">analysis(base, <span class="string">&#x27;src/index.mp.tsx&#x27;</span>, BabelRouterPlugin).then(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>最终我们拿到的路由信息的结构看起来像是这样：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;pages&quot;</span>: [</span><br><span class="line">    <span class="string">&quot;pages/home/index&quot;</span>,</span><br><span class="line">    <span class="string">&quot;pages/video/index&quot;</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">&quot;tabBar&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;list&quot;</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">&quot;pagePath&quot;</span>: <span class="string">&quot;pages/home/index&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;text&quot;</span>: <span class="string">&quot;Home&quot;</span></span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">&quot;pagePath&quot;</span>: <span class="string">&quot;pages/video/index&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;text&quot;</span>: <span class="string">&quot;Video&quot;</span></span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看起来跟上文举例用的小程序的 <code>app.json</code> 内容一模一样，实际上也是这样。在拿到路由信息后我们需要将这些信息存放起来，后续的过程中会用到。</p>
+<h2 id="动态生成-amp-添加虚拟模块"><a href="#动态生成-amp-添加虚拟模块" class="headerlink" title="动态生成 &amp; 添加虚拟模块"></a>动态生成 &amp; 添加虚拟模块</h2><blockquote>
+<p>关于虚拟模块的定义：</p>
+</blockquote>
+<blockquote>
+<p>Webpack Virtual Modules is a plugin that allows for dynamical generation of in-memory virtual modules for JavaScript builds created with webpack. When virtual module is created all the parent virtual dirs that lead to the module filename are created too. This plugin supports watch mode meaning any write to a virtual module is seen by webpack as if a real file stored on disk has changed.<br>摘自：webpack-virtual-modules readme.md。</p>
+</blockquote>
+<p>​</p>
+<p>上文简单翻译过来的意思：<code>Webpack Virtual Modules</code> 是一个插件，它允许为用 Webpack 创建的 JavaScript 构建动态生成内存中的<code>虚拟模块</code>。创建虚拟模块时，也会创建模块文件名的所有父虚拟目录。它支持监视模式，这意味着任何对虚拟模块的写入都会被 webpack 看到，就像是存储在磁盘上的真实文件被修改了一样。</p>
+<p>在开始这一步之前我们需要先了解一下能让一个小程序跑起来的几个要素：<br>1、必备的 <code>app.json</code>、<code>app.js</code> 以及页面文件。<br>2、必须调用 <code>App</code> 来注册小程序、必须调用 <code>Page</code> 注册页面。<br>3、页面路由信息必须在 <code>app.json</code> 文件中声明。</p>
+<p>其中第二个关键要素是本节点相关的，在实际项目中我们是不希望业务侧的同学去写跟小程序直接关联的代码，所以我们必须得经过 AST 操作修改源代码然后借助 <code>Webpack Virtual Modules</code> 生成对应的虚拟文件并监听其内容的修改重新打包。</p>
+<p>App：<br><img src="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1627902933935-a17c6fc0-8043-4085-a105-e1b5aa521449.png#clientId=u25c33056-b4b5-4&from=paste&height=557&id=ud8a888bf&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1114&originWidth=3194&originalType=binary&ratio=1&size=1296585&status=done&style=none&taskId=uafb672ef-128e-4313-bc24-345c2620ac2&width=1597" alt="image.png"></p>
+<blockquote>
+<p>App 这块有个细节需要注意：在 AST 操作要把引入页面的 import 语句删除掉，不然会存在业务代码重复打包的问题。Page 则不存在这个问题。</p>
+</blockquote>
+<p>​</p>
+<p>Page：<br><img src="https://intranetproxy.alipay.com/skylark/lark/0/2021/png/116584/1627902954158-373bc451-3407-4552-a493-83c9dfe82a34.png#clientId=u25c33056-b4b5-4&from=paste&height=380&id=u82243739&margin=%5Bobject%20Object%5D&name=image.png&originHeight=760&originWidth=2716&originalType=binary&ratio=1&size=636654&status=done&style=none&taskId=u0a4fb27b-c5cb-475a-b826-74f158fc25a&width=1358" alt="image.png"></p>
+<p>在这一步我们需要用到之前拿到的路由信息，然后把所有的路由组合成一份新的数据遍历对每个路由对应的文件做 AST、Webpack Virtual Modules 操作，最终动态加入到 Webpack 的 Entry 中。</p>
+<h2 id="生成模板文件"><a href="#生成模板文件" class="headerlink" title="生成模板文件"></a>生成模板文件</h2><p>到目前为止，整个编译的过程已经介绍了一大半，最后一步需要生成页面的模板文件，即：<code>index.wxml</code>，该文件是<strong>必须</strong>存在，否则小程序会报错且无法渲染该页面的视图。<br>​</p>
+<blockquote>
+<p>由于我们的方案是基于小程序的 template 来实现（动态渲染方案） ，所以需要把所使用到的组件模板都提前声明好，在这里我们把这些模板统一放在 base.wxml 文件中，最后在各个页面中调用即可。</p>
+</blockquote>
+<p>pages/home/index.wxml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- pages/home/index.wxml --&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">import</span> <span class="attr">src</span>=<span class="string">&quot;/base.wxml&quot;</span> /&gt;</span> <span class="comment">&lt;!-- 公共模板文件 --&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">template</span> <span class="attr">is</span>=<span class="string">&quot;OCTOPUS_BASE_TEMPLATE&quot;</span> <span class="attr">data</span>=<span class="string">&quot;&#123;&#123;root: root&#125;&#125;&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<p>base.wxml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- helper.wxs 文件内置了一些简单的辅助函数 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">wxs</span> <span class="attr">src</span>=<span class="string">&#x27;./helper.wxs&#x27;</span> <span class="attr">module</span>=<span class="string">&quot;helper&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 根模板，调用该模板可 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">template</span> <span class="attr">name</span>=<span class="string">&quot;OCTOPUS_BASE_TEMPLATE&quot;</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- root 为一棵完整的 VNode tree --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">block</span> <span class="attr">wx:for</span>=<span class="string">&quot;&#123;&#123;root.cn&#125;&#125;&quot;</span> <span class="attr">wx:key</span>=<span class="string">&quot;id&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">template</span> <span class="attr">is</span>=<span class="string">&quot;OCTOPUS_1_CONTAINER&quot;</span> <span class="attr">data</span>=<span class="string">&quot;&#123;&#123;i: item, ancestor: &#x27;&#x27;&#125;&#125;&quot;</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">block</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">template</span> <span class="attr">name</span>=<span class="string">&quot;oc_button&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">button</span> <span class="attr">id</span>=<span class="string">&quot;&#123;&#123;helper.v(i[&#x27;id&#x27;])&#125;&#125;&quot;</span> <span class="attr">bindtap</span>=<span class="string">&quot;eh&quot;</span> <span class="attr">...</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">block</span> <span class="attr">wx:for</span>=<span class="string">&quot;&#123;&#123;i.cn&#125;&#125;&quot;</span> <span class="attr">wx:key</span>=<span class="string">&quot;id&quot;</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">template</span> <span class="attr">is</span>=<span class="string">&quot;&#123;&#123;&#x27;OCTOPUS_&#x27; + (tid + 1) + &#x27;_CONTAINER&#x27;&#125;&#125;&quot;</span> <span class="attr">data</span>=<span class="string">&quot;&#123;&#123;i: item, ancestor: ancestor + &#x27;,&#x27; + i.typ, tid: tid + 1 &#125;&#125;&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">block</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">template</span> <span class="attr">name</span>=<span class="string">&quot;OCTOPUS_1_CONTAINER&quot;</span> <span class="attr">data</span>=<span class="string">&quot;&#123;&#123;i: i&#125;&#125;&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">template</span> <span class="attr">is</span>=<span class="string">&quot;&#123;&#123;helper.tid(i.te, ancestor, i.id)&#125;&#125;&quot;</span> <span class="attr">data</span>=<span class="string">&quot;&#123;&#123;i: i, ancestor: ancestor + &#x27;,&#x27; + i.te, tid: 1 &#125;&#125;&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">template</span> <span class="attr">name</span>=<span class="string">&quot;OCTOPUS_2_CONTAINER&quot;</span> <span class="attr">data</span>=<span class="string">&quot;&#123;&#123;i: i&#125;&#125;&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">template</span> <span class="attr">is</span>=<span class="string">&quot;&#123;&#123;helper.tid(i.te, ancestor, i.id)&#125;&#125;&quot;</span> <span class="attr">data</span>=<span class="string">&quot;&#123;&#123;i: i, ancestor: ancestor + &#x27;,&#x27; + i.te, tid: 1 &#125;&#125;&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span><br><span class="line"></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>​</p>
+<p>生成公共模板的步骤你需要：</p>
+<ol>
+<li>列举一份完整的小程序组件和组件属性的数据；</li>
+<li>一个适合你的模板引擎；</li>
+<li>在 webpack 的插件中调用模板引擎编译出对应的模板内容并生成到指定的位置。</li>
+</ol>
+<p>​</p>
+<p>有了上面的模板文件后，就具备了渲染页面的能力。在进到页面的时候会调用 <code>OCTOPUS_BASE_TEMPLATE</code> 模板，根据页面的 <code>虚拟 DOM 树</code> 递归去找对应的组件模板，最终渲染成正确的视图。<br>​</p>
+<h2 id="开始启动编译"><a href="#开始启动编译" class="headerlink" title="开始启动编译"></a>开始启动编译</h2><p>经过上面的流程拆解，我们可以将以上的流程封装成以下几个插件：</p>
+<ul>
+<li>WebpackEntryProcesserPlugin –&gt; 动态生成 &amp; 添加虚拟模块章节，用于处理源代码。</li>
+<li>WebpackTemplateGeneatorPlugin –&gt; 生成模板文件章节，用于生成页面和公共模板文件。</li>
+</ul>
+<p>​</p>
+<p>你也可以继续封装其他的插件，如：处理自定义组件的、自动分析已使用的组件用于生成更干净的公共模板文件，或者是其他用途的插件。<br>​</p>
+<p>在封装好需要的插件后，就可以唤起 <code>webpack</code> 来编译代码了。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> webpack <span class="keyword">from</span> <span class="string">&#x27;webpack&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; analysis &#125; <span class="keyword">from</span> <span class="string">&#x27;./utils/routes&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> BabelRouterPlugin <span class="keyword">from</span> <span class="string">&#x27;./plugins/babel-router-plugin&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> WebpackEntryProcesserPlugin <span class="keyword">from</span> <span class="string">&#x27;./plugins/webpack-entry-processer-plugin&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> WebpackTemplateGeneatorPlugin <span class="keyword">from</span> <span class="string">&#x27;./plugins/webpack-template-generator-plugin&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> getWebpackConfig = <span class="function">(<span class="params">...args</span>) =&gt;</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &#123;</span><br><span class="line">  	...,</span><br><span class="line">    <span class="attr">plugins</span>: [</span><br><span class="line">	    <span class="keyword">new</span> WebpackEntryProcesserPlugin(),</span><br><span class="line">    	<span class="keyword">new</span> WebpackTemplateGeneatorPlugin(),</span><br><span class="line">      ...</span><br><span class="line">    ],</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> build = <span class="keyword">async</span> (&#123; target, debug, watch, base, zip, compress, progress &#125;) =&gt; &#123;</span><br><span class="line">	analysis(base, <span class="string">&#x27;src/index.mp.tsx&#x27;</span>, BabelRouterPlugin).then(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> compiler = webpack(getWebpackConfig(&#123; ... &#125;));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (watch === <span class="literal">true</span>) &#123;</span><br><span class="line">      compiler.watch(&#123;</span><br><span class="line">        <span class="comment">// 注意：监听文件时应忽略虚拟模块，否则会陷入死循环</span></span><br><span class="line">        <span class="attr">ignored</span>: [</span><br><span class="line">          <span class="string">&#x27;**/**.virtual.ts&#x27;</span>,</span><br><span class="line">          ...</span><br><span class="line">        ],</span><br><span class="line">      &#125;, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// Skip...</span></span><br><span class="line">      &#125;);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// Skip...</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>通过该篇文章我们大概了解了将 <code>React 代码</code> 编译成 <code>小程序代码</code> 的过程，也是整个编译过程的核心逻辑：</p>
+<ol>
+<li>解析出业务代码中的路由，暂存起来；</li>
+<li>根据路由信息在对应的路径做 <code>AST</code> 的操作修改代码并生成新的虚拟模块，然后动态加入到 Webpack 的 Entry 中；</li>
+<li>生成对应的页面模板文件和公共模板文件。</li>
+</ol>
+<p>除此之外还简单介绍了一下动态渲染的方案：因小程序的限制无法操作 DOM，只能通过 <code>template</code> 进行循环调用，另外还需要将使用到的组件模板提前声明好，最终在页面的模板文件中调用对应的模板完成页面的渲染。</p>
+<p>如果你觉得以上内容有错误或者有改进和疑问的地方，欢迎在评论区留言，我们会持续改进我们的方案，感谢阅读~~</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://blog.artisans.cafe/2021-08-03/how-to-transform-react-to-mini-program/" title="小程序跨端—浅谈小程序代码编译过程" target="_blank" rel="external">http://blog.artisans.cafe/2021-08-03/how-to-transform-react-to-mini-program/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN 协议</a>许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/code-artisan" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/code-artisan" target="_blank"><span class="text-dark">北漂客</span><small class="ml-1x">Web 前端 &amp;&amp; 移动开发</small></a></h3>
+        <div>个人简介。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2021-05-25/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E8%B7%A8%E7%AB%AF%E2%80%94%E5%9C%A8%E5%B0%8F%E7%A8%8B%E5%BA%8F%E9%87%8C%E9%9D%A2%E8%B7%91%20react%20app/" title="小程序跨端—在小程序里面跑 react app"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/code-artisan" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: 'fa54b16e686689d3cae8',
+    clientSecret: '98397dcfd10d3d92025391e8bfee3d8bfceaaffa',
+    repo: 'code-artisan.github.io',
+    owner: 'code-artisan',
+    admin: ['code-artisan'],
+    id: md5(location.pathname),
+    distractionFreeMode: true
+  })
+  gitalk.render('comments')
+  </script>
+
+      
+
+
+
+
+
+
+
+</body>
+</html>
